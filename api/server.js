@@ -1,6 +1,6 @@
 const express = require('express');
 
-const blogPostRouter = require('../blogPosts/blogPosts-router');
+const blogPostsRouter = require('../blogPosts/blogPosts-router.js');
 
 const server = express();
 
@@ -12,6 +12,6 @@ server.get('/', (req, res) => {
   )
 });
 
-server.use('../blogPosts/blogPosts-router.js', blogPostRouter);
+server.use('/api/posts', blogPostsRouter);
 
 module.exports = server; 

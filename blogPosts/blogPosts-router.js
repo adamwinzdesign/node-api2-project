@@ -19,10 +19,9 @@ router.get('/', (req, res) => {
 });
 
 // get post by ID
-// NEED TO CORRECT logic if post not found, currently returns 200 and empty array
 router.get('/:id', (req, res) => {
   blogPosts.findById(req.params.id)
-    .then(post => {
+    .then(([post]) => {
       { post ? res.status(200).json(post) : res.status(404).json({ message: 'Post not found in blogPosts-router.js, get post by ID' })}
     })
     .catch(error => {
@@ -72,6 +71,35 @@ router.put('/:id', (req, res) => {
     .catch(error => {
       res.status(500).json({ errorMessage: '** Server error updating the post **', error });
     })
+});
+
+// get all comments from a single blog post
+// Only returns one comment???
+router.get('/:id/comments', (req, res) => {
+  const { id } = req.params;
+
+  blogPosts.findPostComments(id)
+    .then(([post]) => {
+      { post ? blogPosts.findPostComments(id) 
+        .then(([comments]) => {
+          { comments ? res.status(200).json(comments) : res.status(404).json({ message: 'The comments could not be located' })}
+        }) : res.status(404).json({ message: 'The post with that ID could not be located' })}
+    })
+    .catch(error => {
+      res.status(500).json({ errorMessage: 'Server error getting the post', error })
+    })
 })
+
+// get comment by comment ID
+router.get('/comment/:id', (req, res) => {
+  blogPosts.findCommentById(req.params.id)
+    .then(comment => {
+      { comment ? res.status(200).json(post) : res.status(404).json({ message: 'Comment not found in blogPosts-router.js, get comment by comment ID' })}
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ errorMessage: 'Server error getting comment by ID in blogPosts-router.js '});
+    })
+});
 
 module.exports = router;

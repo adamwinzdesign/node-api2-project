@@ -23,7 +23,7 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   blogPosts.findById(req.params.id)
     .then(post => {
-      {post ? res.status(200).json(post) : res.status(404).json({ message: 'Post not found in blogPosts-router.js, get post by ID' })}
+      { post ? res.status(200).json(post) : res.status(404).json({ message: 'Post not found in blogPosts-router.js, get post by ID' })}
     })
     .catch(error => {
       console.log(error);
@@ -46,5 +46,32 @@ router.post('/', (req, res) => {
       })
   }
 });
+
+// delete post with given ID
+router.delete('/:id', (req, res) => {
+  blogPosts.remove(req.params.id)
+    .then(count => {
+      if(count > 0) {
+        res.status(200).json({ message: 'Post deleted!' })
+      } else {
+        res.status(404).json({ message: 'Post could not be located.' })
+      }
+    })
+    .catch(error => {
+      res.status(500).json({ message: '** Server error removing the post **', error })
+    })
+});
+
+// update post with put request
+router.put('/:id', (req, res) => {
+  const changes = req.body;
+  blogPosts.update(req.params.id, changes)
+    .then(post => {
+      { post ? res.status(200).json(post) : res.status(404).json({ message: 'Post could not be found' })}
+    })
+    .catch(error => {
+      res.status(500).json({ errorMessage: '** Server error updating the post **', error });
+    })
+})
 
 module.exports = router;

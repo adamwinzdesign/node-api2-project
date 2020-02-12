@@ -73,33 +73,49 @@ router.put('/:id', (req, res) => {
     })
 });
 
-// get all comments from a single blog post
-// Only returns one comment???
+// if post length === 0, send 404, else 200 with post
+// get all comments from a single post
 router.get('/:id/comments', (req, res) => {
-  const { id } = req.params;
-
+  const id = req.params.id;
   blogPosts.findPostComments(id)
-    .then(([post]) => {
-      { post ? blogPosts.findPostComments(id) 
-        .then(([comments]) => {
-          { comments ? res.status(200).json(comments) : res.status(404).json({ message: 'The comments could not be located' })}
-        }) : res.status(404).json({ message: 'The post with that ID could not be located' })}
+    .then(post => {
+      if(post.length === 0) {
+        res.status(404).json({ message: 'Post not found' });
+      } else {
+        res.status(200).json(post)
+      }
     })
     .catch(error => {
-      res.status(500).json({ errorMessage: 'Server error getting the post', error })
+      res.status(500).json({ errorMessage: 'Server error, could not get comments', error })
     })
 })
 
-// get comment by comment ID
-router.get('/comment/:id', (req, res) => {
-  blogPosts.findCommentById(req.params.id)
-    .then(comment => {
-      { comment ? res.status(200).json(post) : res.status(404).json({ message: 'Comment not found in blogPosts-router.js, get comment by comment ID' })}
+// submit new comment
+router.post('/:id/comments', (req, res) => {
+  const id = req.params.id;
+  const text = req.body;
+
+  blogPosts.findById(id)
+    .first()
+    .then(post => {
+      if(!post) {
+        res.status(400).json({ message: 'Could not locate a post with that ID' });
+      } else if(!text) {
+        res.status(400).json({ message: 'Please include text for your comment!' })
+      } else {
+        const newComment = { text, id }
+        blogPosts.insertComment(newComment)
+          .then(comment => {
+            res.status(200).json({ message: 'Comment added!' })
+          })
+          .catch(error => {
+            res.status(500).json({ errorMessage: 'Server error adding comment', error })
+          })
+      }
     })
     .catch(error => {
-      console.log(error);
-      res.status(500).json({ errorMessage: 'Server error getting comment by ID in blogPosts-router.js '});
+      res.status(500).json({ errorMessage: 'Server error getting post prior to inserting comment', error })
     })
-});
+})
 
 module.exports = router;

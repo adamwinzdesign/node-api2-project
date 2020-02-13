@@ -92,10 +92,10 @@ router.get('/:id/comments', (req, res) => {
 
 // submit new comment
 router.post('/:id/comments', (req, res) => {
-  const id = req.params.id;
-  const text = req.body;
+  const post_id = req.params.id;
+  const {text} = req.body;
 
-  blogPosts.findById(id)
+  blogPosts.findById(post_id)
     .first()
     .then(post => {
       if(!post) {
@@ -103,7 +103,7 @@ router.post('/:id/comments', (req, res) => {
       } else if(!text) {
         res.status(400).json({ message: 'Please include text for your comment!' })
       } else {
-        const newComment = { text, id }
+        const newComment = { text, post_id }
         blogPosts.insertComment(newComment)
           .then(comment => {
             res.status(200).json({ message: 'Comment added!' })
